@@ -1,12 +1,14 @@
+#!/usr/bin/env python
+
 import requests, re, sys, time, datetime, hmac
 import paho.mqtt.publish as publish
 
 ip = sys.argv[1]
 password = sys.argv[2]
 mqtt = sys.argv[3]
-delay_stats = int(sys.argv[4])
-delay_conf = int(sys.argv[5])
-topic = sys.argv[6]
+topic = sys.argv[4]
+delay_stats = int(sys.argv[5])
+delay_conf = int(sys.argv[6])
 next_stats = next_conf = datetime.datetime.now().timestamp()
 lasttime = None
 last = dict()
@@ -33,7 +35,7 @@ while True:
     if datetime.datetime.now().timestamp() >= next_stats:
         cookie = requests.post('http://{}/login.htm'.format(ip), data={ 'submitId': 'pwdLogin', 'password': digest(password), 'submitEnd': ''})
         r = requests.get('http://{}/config/monitoring_port_statistics.htm'.format(ip), cookies=cookie.cookies)
-        
+
         for i in r.text.replace("\r", "\n").split('\n'):
             if re.match("StatisticsEntry\[[0-9]+\]", i):
                 port = re.sub("StatisticsEntry\[[0-9]+\] = '([^']+)';", r'\1', i).split('?')
